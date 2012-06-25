@@ -10,7 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.igloo.locapp.R.string;
 import com.igloo.locapp.contentprovider.LocationContentProvider;
 
 public class UpdateLocations extends AsyncTask<String, Void, String> {
@@ -30,36 +31,35 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 	private Uri locationUri;
 	private Context locAppContext;
 	
-	UpdateLocations(Context context){
+	public UpdateLocations(Context context){
 		locAppContext = context;
 	}
 
 	@Override
 	protected String doInBackground(String... urls) {
 		String response = "";
-		for (String url: urls) {
-			getServerData(url);
+		getServerData(urls[0], urls[1], urls[2]);
 			
-		}
 		return response;
 	}
 	
-	private void getServerData(String scriptUrl) {
+	private void getServerData(String scriptUrl, String latitude, String longitude) {
 	    
 		   InputStream is = null;
 		   String result = "";
 		   HttpClient httpclient = new DefaultHttpClient();
-		   HttpGet httpget = new HttpGet(scriptUrl);
+		   HttpPost httppost = new HttpPost(scriptUrl);
 		   
 		    //the year data to send
 		    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(); // TODO:look at it on saturday
-		    nameValuePairs.add(new BasicNameValuePair("year","1970"));
+		    nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
+		    nameValuePairs.add(new BasicNameValuePair("latitude",latitude));
+		    nameValuePairs.add(new BasicNameValuePair("user_id","huzefazakir"));
 
-		    //http post
+		    //HTTP post
 		    try{
-		            
-		            
-		            HttpResponse response = httpclient.execute(httpget);
+		    	    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		            HttpResponse response = httpclient.execute(httppost);
 		            HttpEntity entity = response.getEntity();
 		            is = entity.getContent();
 
