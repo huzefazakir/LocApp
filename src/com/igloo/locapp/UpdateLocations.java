@@ -19,17 +19,18 @@ import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.igloo.locapp.R.string;
 import com.igloo.locapp.contentprovider.LocationContentProvider;
 
 public class UpdateLocations extends AsyncTask<String, Void, String> {
 	
 	private Uri locationUri;
 	private Context locAppContext;
+	private static String TAG = "UpdateLoactions"; 
 	
 	public UpdateLocations(Context context){
 		locAppContext = context;
@@ -93,12 +94,36 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		                    );
 		                    
 		                    ContentValues values = new ContentValues();
-		                    values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
+		                    //values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
 		                    values.put(LocationTable.COLUMN_DISTANCE, json_data.getInt("distance"));
 		                    values.put(LocationTable.COLUMN_TIME, json_data.getString("time_stamp"));
 		                    
-		                    locationUri = locAppContext.getContentResolver().insert(LocationContentProvider.CONTENT_URI, values);
-		                     
+		                    String [] projection ={LocationTable.COLUMN_TIME};
+		                    String selection = LocationTable.COLUMN_USER_ID + " = ?";
+		                    String [] selectionArgs = {json_data.getString("user_id")};
+		                    Cursor cursor = locAppContext.getContentResolver().query(LocationContentProvider.CONTENT_URI , projection, selection, selectionArgs, null);
+		                    
+		                    if (cursor != null){
+		                    	if(cursor.getCount() > 1){
+		                    		Log.e(TAG,"erroneous getCount:" + cursor.getCount());
+		                    	}
+		                    	
+		                    	else if (cursor.getCount() == 1){
+		                    		int rowsUpdated =  locAppContext.getContentResolver().update(LocationContentProvider.CONTENT_URI, values, selection, selectionArgs);
+		                    		Log.d(TAG,"Number of rows updated: " + rowsUpdated );
+		                    	}
+		                    	
+		                    	else {
+		                    	    values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
+		                            locationUri = locAppContext.getContentResolver().insert(LocationContentProvider.CONTENT_URI, values);
+		                    	}
+		                    	
+		                    	cursor.close();
+		                    	
+		                    }
+		                    else {
+		                    	Log.e(TAG, "cursor null");
+		                    }
 		            }
 		    }catch(JSONException e){
 		            Log.e("log_tag", "Error parsing data "+e.toString());

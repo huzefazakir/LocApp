@@ -53,18 +53,7 @@ public class LocAppActivity extends ListActivity implements LoaderManager.Loader
 			Log.i(TAG,"Provider not available");	
 		}        
 		fillData();
-		
-		
-	/*	new Thread(new Runnable() { 
-            public void run(){
-            	String test = "";
-            	//getServerData(test);
-            	Log.d("test","final data: " + test);
-            }
-        }).start();*/
-		
-		
-        
+			        
     }
     
     @Override
