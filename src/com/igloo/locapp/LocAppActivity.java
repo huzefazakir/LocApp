@@ -1,25 +1,25 @@
 package com.igloo.locapp;
-
-import android.app.ListActivity;
-import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.location.Criteria;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.igloo.locapp.contentprovider.LocationContentProvider;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
 
 
-public class LocAppActivity extends ListActivity implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
+public class LocAppActivity extends FragmentActivity implements LocationListener {
     
+	
+	Facebook facebook = new Facebook("355719041162891");
 	// private Cursor cursor;
 	private SimpleCursorAdapter adapter;
 	private static final String scriptUrl = "http://10.2.19.184/getLocation.php";
@@ -33,8 +33,22 @@ public class LocAppActivity extends ListActivity implements LoaderManager.Loader
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.location_list);
-        this.getListView().setDividerHeight(2); //TODO: check what is this.
+        setContentView(R.layout.location_list_fragment);
+        
+        facebook.authorize(this, new DialogListener() {
+            @Override
+            public void onComplete(Bundle values) {}
+
+            @Override
+            public void onFacebookError(FacebookError error) {}
+
+            @Override
+            public void onError(DialogError e) {}
+
+            @Override
+            public void onCancel() {}
+        });
+    
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         
         //Criteria criteria = new Criteria();
@@ -52,8 +66,14 @@ public class LocAppActivity extends ListActivity implements LoaderManager.Loader
 		} else {
 			Log.i(TAG,"Provider not available");	
 		}        
-		fillData();
 			        
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        facebook.authorizeCallback(requestCode, resultCode, data);
     }
     
     @Override
@@ -73,45 +93,12 @@ public class LocAppActivity extends ListActivity implements LoaderManager.Loader
     	
     }
 	
-	private void fillData() {
-
-		// Fields from the database (projection)
-		// Must include the _id column for the adapter to work
-		String[] from = new String[] { LocationTable.COLUMN_ID, LocationTable.COLUMN_USER_ID, LocationTable.COLUMN_DISTANCE, LocationTable.COLUMN_TIME };
-		// Fields on the UI to which we map
-		int[] to = new int[] { R.id.label1, R.id.label2, R.id.label3, R.id.label4  };
-
-		getLoaderManager().initLoader(0, null, this);
-		adapter = new SimpleCursorAdapter(this, R.layout.location_row, null, from,
-				to, 0);
-
-		setListAdapter(adapter);
-	}
 	
 	private void getData(float latitude, float longitude) {
 		UpdateLocations locations = new UpdateLocations(getBaseContext());
 		locations.execute(new String[] {scriptUrl, Float.toString(longitude), Float.toString(latitude)});
 	}
 	
-
-	@Override
-	public Loader<Cursor> onCreateLoader(int id, Bundle arg1) {
-		String[] projection = { LocationTable.COLUMN_ID, LocationTable.COLUMN_USER_ID, LocationTable.COLUMN_DISTANCE, LocationTable.COLUMN_TIME };
-		CursorLoader cursorLoader = new CursorLoader(this,
-				LocationContentProvider.CONTENT_URI, projection, null, null, null);
-		return cursorLoader;
-	}
-
-	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		adapter.swapCursor(data);		
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> loader) {
-		// data is not available anymore, delete reference
-		adapter.swapCursor(null);
-	}
 
 	@Override
 	public void onLocationChanged(Location location) {
