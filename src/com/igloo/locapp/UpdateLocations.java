@@ -30,16 +30,23 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 	
 	private Uri locationUri;
 	private Context locAppContext;
-	private static String TAG = "UpdateLoactions"; 
+	private static final String TAG = "UpdateLocations";
+	private UpdateAccess valAccessToken;
+	private final String accessToken; 
 	
-	public UpdateLocations(Context context){
+	public UpdateLocations(Context context, String fbAccessToken){
 		locAppContext = context;
+		accessToken = fbAccessToken;
+		valAccessToken = new UpdateAccess(fbAccessToken);
 	}
 
 	@Override
 	protected String doInBackground(String... urls) {
 		String response = "";
-		getServerData(urls[0], urls[1], urls[2]);
+		if (valAccessToken.updateTokenOnServer() == 1)
+			getServerData(urls[0], urls[1], urls[2]);
+		else
+			Log.d(TAG,"Facebook token invalid");
 			
 		return response;
 	}
@@ -52,10 +59,10 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		   HttpPost httppost = new HttpPost(scriptUrl);
 		   
 		    //the year data to send
-		    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(); // TODO:look at it on saturday
+		    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 		    nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
 		    nameValuePairs.add(new BasicNameValuePair("latitude",latitude));
-		    nameValuePairs.add(new BasicNameValuePair("user_id","huzefazakir"));
+		    nameValuePairs.add(new BasicNameValuePair("accessToken",accessToken));
 
 		    //HTTP post
 		    try{
@@ -65,7 +72,7 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		            is = entity.getContent();
 
 		    }catch(Exception e){
-		            Log.e("log_tag", "Error in http connection "+e.toString());
+		            Log.e(TAG, "Error in http connection "+e.toString());
 		    }
 
 		    //convert response to string
@@ -78,16 +85,16 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		            }
 		            is.close();
 		            result=sb.toString();
-		            Log.i ("Log_Tag",result);
+		            Log.i (TAG,result);
 		    }catch(Exception e){
-		            Log.e("log_tag", "Error converting result "+e.toString());
+		            Log.e(TAG, "Error converting result "+e.toString());
 		    }
 		    //parse json data
 		    try{
 		            JSONArray jArray = new JSONArray(result);
 		            for(int i=0;i<jArray.length();i++){
 		                    JSONObject json_data = jArray.getJSONObject(i);
-		                    Log.i("log_tag","id: "+json_data.getInt("id")+
+		                    Log.i(TAG,"id: "+json_data.getInt("id")+
 		                            ", name: "+json_data.getString("user_id")+
 		                            ", distance: "+json_data.getInt("distance")+
 		                            ", date: "+json_data.getString("time_stamp")
@@ -97,10 +104,10 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		                    //values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
 		                    values.put(LocationTable.COLUMN_DISTANCE, json_data.getInt("distance"));
 		                    values.put(LocationTable.COLUMN_TIME, json_data.getString("time_stamp"));
-		                    
+		              
 		                    String [] projection ={LocationTable.COLUMN_TIME};
-		                    String selection = LocationTable.COLUMN_USER_ID + " = ?";
-		                    String [] selectionArgs = {json_data.getString("user_id")};
+		                    String selection = LocationTable.COLUMN_ID + " = ?";
+		                    String [] selectionArgs = {json_data.getString("id")};
 		                    Cursor cursor = locAppContext.getContentResolver().query(LocationContentProvider.CONTENT_URI , projection, selection, selectionArgs, null);
 		                    
 		                    if (cursor != null){
@@ -114,7 +121,7 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		                    	}
 		                    	
 		                    	else {
-		                    	    values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
+		                    	    values.put(LocationTable.COLUMN_ID, json_data.getLong("id") );
 		                            locationUri = locAppContext.getContentResolver().insert(LocationContentProvider.CONTENT_URI, values);
 		                    	}
 		                    	

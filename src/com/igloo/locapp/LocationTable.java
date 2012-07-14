@@ -15,7 +15,7 @@ public class LocationTable {
 	// Database creation sql statement
 	private static final String DATABASE_CREATE = "create table "
 			+ TABLE_LOCATION + "( " + COLUMN_ID
-			+ " integer primary key autoincrement, " + COLUMN_USER_ID
+			+ " integer primary key, " + COLUMN_USER_ID
 			+ " text null, " +COLUMN_DISTANCE + " integer not null, " + COLUMN_TIME + " text not null);";
 
 	public static void onCreate(SQLiteDatabase database) {

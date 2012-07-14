@@ -1,6 +1,7 @@
 package com.igloo.locapp;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,36 +20,64 @@ import com.facebook.android.FacebookError;
 public class LocAppActivity extends FragmentActivity implements LocationListener {
     
 	
-	Facebook facebook = new Facebook("355719041162891");
+	
 	// private Cursor cursor;
-	private SimpleCursorAdapter adapter;
-	private static final String scriptUrl = "http://10.2.19.184/getLocation.php";
+	//private SimpleCursorAdapter adapter;
+	private static final String locationScriptUrl = "http://10.2.19.184/getLocation.php";
+	//private static final String accessScriptUrl = "http://10.2.19.184/updateAccess.php";
 	private LocationManager locationManager;
 	private String provider;
-	private String TAG = "LocAppActivity";
+	private static final String TAG = "LocAppActivity";
+	private static final String FB_APP_ID = "355719041162891";
+	private SharedPreferences fbSharedPrefs;
 	
-	
-	
+	Facebook facebook = new Facebook(FB_APP_ID);
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.location_list_fragment);
         
-        facebook.authorize(this, new DialogListener() {
-            @Override
-            public void onComplete(Bundle values) {}
+        /*
+         * Get existing access_token if any
+         */
+        fbSharedPrefs = getPreferences(MODE_PRIVATE);
+        String access_token = fbSharedPrefs.getString("access_token", null);
+        long expires = fbSharedPrefs.getLong("access_expires", 0);
+        if(access_token != null) {
+            facebook.setAccessToken(access_token);
+            Log.d(TAG, "access toke from facebook" + access_token);
+        }
+        if(expires != 0) {
+            facebook.setAccessExpires(expires);
+        }
+        
+        
+        /*
+         * Only call authorize if the access_token has expired.
+         */
+        if(!facebook.isSessionValid()) {
 
-            @Override
-            public void onFacebookError(FacebookError error) {}
-
-            @Override
-            public void onError(DialogError e) {}
-
-            @Override
-            public void onCancel() {}
-        });
+            facebook.authorize(this, new String[] {}, new DialogListener() {
+                @Override
+                public void onComplete(Bundle values) {
+                    SharedPreferences.Editor editor = fbSharedPrefs.edit();
+                    editor.putString("access_token", facebook.getAccessToken());
+                    editor.putLong("access_expires", facebook.getAccessExpires());
+                    editor.commit();
+                }
     
+                @Override
+                public void onFacebookError(FacebookError error) {Log.e(TAG,"Facebook error" + error.toString());}
+    
+                @Override
+                public void onError(DialogError error) {Log.e(TAG,"Facebook dialog error" + error.toString());}
+    
+                @Override
+                public void onCancel() {Log.e(TAG,"Facebook autentication cancelled");}
+            });
+        }
+        
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         
         //Criteria criteria = new Criteria();
@@ -89,14 +118,15 @@ public class LocAppActivity extends FragmentActivity implements LocationListener
 	}
     
     
-    private void updateUserLocation(){
+   /* private void updateUserLocation(){
     	
-    }
+    }*/
 	
 	
 	private void getData(float latitude, float longitude) {
-		UpdateLocations locations = new UpdateLocations(getBaseContext());
-		locations.execute(new String[] {scriptUrl, Float.toString(longitude), Float.toString(latitude)});
+		
+		UpdateLocations locations = new UpdateLocations(getBaseContext(), facebook.getAccessToken());
+		locations.execute(new String[] {locationScriptUrl, Float.toString(longitude), Float.toString(latitude)});
 	}
 	
 
@@ -124,7 +154,5 @@ public class LocAppActivity extends FragmentActivity implements LocationListener
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 		
-	}
-	
-	
+	}	
 }
