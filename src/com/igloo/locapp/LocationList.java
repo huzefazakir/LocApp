@@ -25,9 +25,9 @@ public class LocationList extends ListFragment implements LoaderManager.LoaderCa
 	}
 	
     private void displayLocations() {
-    	String[] from = new String[] { LocationTable.COLUMN_ID, LocationTable.COLUMN_USER_ID, LocationTable.COLUMN_DISTANCE, LocationTable.COLUMN_TIME };
+    	String[] from = new String[] {LocationTable.COLUMN_USER_ID, LocationTable.COLUMN_DISTANCE, LocationTable.COLUMN_TIME };
 		// Fields on the UI to which we map
-		int[] to = new int[] { R.id.label1, R.id.label2, R.id.label3, R.id.label4  };
+		int[] to = new int[] { R.id.textView2, R.id.textView1, R.id.textView3};
 		getActivity().getSupportLoaderManager().initLoader(0, null, this);
         adapter = new SimpleCursorAdapter(getActivity(),R.layout.location_row, null, from, to);
 		setListAdapter(adapter);    	 

@@ -8,7 +8,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.SimpleCursorAdapter;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.facebook.android.DialogError;
@@ -35,9 +35,9 @@ public class LocAppActivity extends FragmentActivity implements LocationListener
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.location_list_fragment);
-        
+        super.onCreate(savedInstanceState);      
+       
+        setContentView(R.layout.location_list_fragment_v2);
         /*
          * Get existing access_token if any
          */
@@ -46,7 +46,7 @@ public class LocAppActivity extends FragmentActivity implements LocationListener
         long expires = fbSharedPrefs.getLong("access_expires", 0);
         if(access_token != null) {
             facebook.setAccessToken(access_token);
-            Log.d(TAG, "access toke from facebook" + access_token);
+            Log.d(TAG, "access token from facebook" + access_token);
         }
         if(expires != 0) {
             facebook.setAccessExpires(expires);

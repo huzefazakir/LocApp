@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <ToggleButton
+        android:id="@+id/toggleButton1"
+        android:layout_width="80dp"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="1dp"
+        android:alpha="1"
+        android:gravity="center"
+        android:text="@string/string_visibility"
+        android:textOff="@string/string_invisible"
+        android:textOn="@string/string_visible" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/app_name" />
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="83dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center"
+        android:layout_marginTop="1dp"
+        android:alpha="1"
+        android:visibility="visible" />
+
+</LinearLayout>

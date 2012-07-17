@@ -3,5 +3,9 @@
 
     <string name="hello">Hello World, LocAppActivity!</string>
     <string name="app_name">LocApp</string>
+    <string name="string_distance_metric">mi</string>
+    <string name="string_visibility">visibility</string>
+    <string name="string_visible">Visible</string>
+    <string name="string_invisible">Invisible</string>
 
 </resources>
