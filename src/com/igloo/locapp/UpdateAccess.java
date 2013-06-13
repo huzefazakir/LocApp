@@ -13,23 +13,17 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 public class UpdateAccess{
 
-	private String accessToken;
 	private String scriptUrl = "http://10.2.19.184/updateAccess.php";
 	private static final String TAG ="UpdateAccess";
-    public UpdateAccess(String fbAccessToken) {
-    	accessToken = fbAccessToken;
-    }
 	
-	public int updateTokenOnServer(){
+	public int updateTokenOnServer(String accessToken){
 		
 		InputStream is = null;
 		String result = "";
@@ -42,6 +36,7 @@ public class UpdateAccess{
 	    
 	  //HTTP post
 	    try{
+	    	    Log.e(TAG, "connecting to server");
 	    	    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 	            HttpResponse response = httpclient.execute(httppost);
 	            HttpEntity entity = response.getEntity();
@@ -61,7 +56,7 @@ public class UpdateAccess{
 	            }
 	            is.close();
 	            result=sb.toString();
-	            Log.i (TAG,"Result:" +result);
+	            Log.i (TAG,"http Result:" +result);
 	    }catch(Exception e){
 	            Log.e(TAG, "Error converting result "+e.toString());
 	    }

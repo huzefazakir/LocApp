@@ -174,7 +174,7 @@ public class LocationContentProvider extends ContentProvider {
 	}
 	
 	private void checkColumns(String[] projection) {
-		String[] available = { LocationTable.COLUMN_DISTANCE,
+		String[] available = { LocationTable.COLUMN_LOCATION,
 				LocationTable.COLUMN_ID, LocationTable.COLUMN_TIME, LocationTable.COLUMN_USER_ID};
 		if (projection != null) {
 			HashSet<String> requestedColumns = new HashSet<String>(Arrays.asList(projection));

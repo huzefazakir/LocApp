@@ -8,7 +8,7 @@ public class LocationTable {
 	public static final String TABLE_LOCATION = "location";
 	public static final String COLUMN_ID = "_id";
 	public static final String COLUMN_USER_ID = "user_id";
-	public static final String COLUMN_DISTANCE = "distance";
+	public static final String COLUMN_LOCATION = "location";
 	public static final String COLUMN_TIME ="time";
 	
 	
@@ -16,7 +16,7 @@ public class LocationTable {
 	private static final String DATABASE_CREATE = "create table "
 			+ TABLE_LOCATION + "( " + COLUMN_ID
 			+ " integer primary key, " + COLUMN_USER_ID
-			+ " text null, " +COLUMN_DISTANCE + " integer not null, " + COLUMN_TIME + " text not null);";
+			+ " text null, " +COLUMN_LOCATION + " text not null, " + COLUMN_TIME + " text not null);";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);

@@ -32,28 +32,27 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 	private Context locAppContext;
 	private static final String TAG = "UpdateLocations";
 	private UpdateAccess valAccessToken;
-	private final String accessToken; 
 	
-	public UpdateLocations(Context context, String fbAccessToken){
+	public UpdateLocations(Context context){
 		locAppContext = context;
-		accessToken = fbAccessToken;
-		valAccessToken = new UpdateAccess(fbAccessToken);
+		valAccessToken = new UpdateAccess();
 	}
 
 	@Override
 	protected String doInBackground(String... urls) {
 		String response = "";
-		if (valAccessToken.updateTokenOnServer() == 1)
-			getServerData(urls[0], urls[1], urls[2]);
+		if (valAccessToken.updateTokenOnServer(urls[3]) == 1)
+			getServerData(urls[0], urls[1], urls[2], urls[3]);
 		else
-			Log.d(TAG,"Facebook token invalid");
+			Log.e(TAG,"Facebook token invalid");
 			
 		return response;
 	}
 	
-	private void getServerData(String scriptUrl, String latitude, String longitude) {
+	private void getServerData(String scriptUrl, String latitude, String longitude, String accessToken) {
 	    
 		   InputStream is = null;
+		   String location = "Woodland Hills, California";
 		   String result = "";
 		   HttpClient httpclient = new DefaultHttpClient();
 		   HttpPost httppost = new HttpPost(scriptUrl);
@@ -63,6 +62,7 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		    nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
 		    nameValuePairs.add(new BasicNameValuePair("latitude",latitude));
 		    nameValuePairs.add(new BasicNameValuePair("accessToken",accessToken));
+		    nameValuePairs.add(new BasicNameValuePair("location", location));
 
 		    //HTTP post
 		    try{
@@ -85,7 +85,7 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		            }
 		            is.close();
 		            result=sb.toString();
-		            Log.i (TAG,result);
+		            Log.i (TAG,"Result:" +result);
 		    }catch(Exception e){
 		            Log.e(TAG, "Error converting result "+e.toString());
 		    }
@@ -96,13 +96,13 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		                    JSONObject json_data = jArray.getJSONObject(i);
 		                    Log.i(TAG,"id: "+json_data.getInt("id")+
 		                            ", name: "+json_data.getString("user_id")+
-		                            ", distance: "+json_data.getInt("distance")+
+		                            ", location: "+json_data.getString("location")+
 		                            ", date: "+json_data.getString("time_stamp")
 		                    );
 		                    
 		                    ContentValues values = new ContentValues();
-		                    //values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
-		                    values.put(LocationTable.COLUMN_DISTANCE, json_data.getInt("distance"));
+		                    values.put(LocationTable.COLUMN_USER_ID, json_data.getString("user_id") );
+		                    values.put(LocationTable.COLUMN_LOCATION, json_data.getString("location"));
 		                    values.put(LocationTable.COLUMN_TIME, json_data.getString("time_stamp"));
 		              
 		                    String [] projection ={LocationTable.COLUMN_TIME};
@@ -133,7 +133,7 @@ public class UpdateLocations extends AsyncTask<String, Void, String> {
 		                    }
 		            }
 		    }catch(JSONException e){
-		            Log.e("log_tag", "Error parsing data "+e.toString());
+		            Log.e(TAG, "Error parsing data "+e.toString());
 		    } 
 		}    
 }
