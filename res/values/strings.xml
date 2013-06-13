@@ -7,5 +7,22 @@
     <string name="string_visibility">visibility</string>
     <string name="string_visible">Visible</string>
     <string name="string_invisible">Invisible</string>
-
+    <string-array name="array_radius_miles">
+        <item>5 miles</item>
+        <item>10 miles Angles</item>
+        <item>50 miles</item>
+        <item>all friends</item>
+    </string-array>
+    
+    <string-array name="array_radius_km">
+        <item>5 km</item>
+        <item>10 km</item>
+        <item>50 km</item>
+        <item>all friends</item>
+    </string-array>
+    <string name="get_started">To get started, log in using facebook</string>
+    <string name="settings">Settings</string>
+    <string name="app_id">509544535778996</string>
+    <string name="refresh">Refresh</string>
+    
 </resources>
