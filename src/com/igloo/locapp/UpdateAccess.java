@@ -20,7 +20,8 @@ import android.util.Log;
 
 public class UpdateAccess{
 
-	private String scriptUrl = "http://10.2.19.184/updateAccess.php";
+	//private String scriptUrl = "http://10.2.19.184/updateAccess.php";
+	private String scriptUrl = "http://igloo.dyndns-server.com/scripts/updateAccess.php";
 	private static final String TAG ="UpdateAccess";
 	
 	public int updateTokenOnServer(String accessToken){
@@ -62,16 +63,12 @@ public class UpdateAccess{
 	    }
 	    
 	    try{
-            //JSONArray jArray = new JSONArray(result);
-            //for(int i=0;i<jArray.length();i++){
-                JSONObject json_data = new JSONObject(result);
-                Log.i(TAG,"success: "+json_data.getString("success"));
-                success = json_data.getInt("success");
-            //}        
+            JSONObject json_data = new JSONObject(result);
+            Log.i(TAG,"success: "+json_data.getString("success"));
+            success = json_data.getInt("success");        
 	    } catch(JSONException e){
             Log.e(TAG, "Error parsing data "+e.toString());
 	    }
-	    return success;
-	    	
+	    return success;	    	
 	}
 }

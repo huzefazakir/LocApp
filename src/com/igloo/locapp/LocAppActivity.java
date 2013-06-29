@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -25,12 +25,14 @@ import android.widget.Toast;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.igloo.locapp.contentprovider.LocationContentProvider;
 
 
 public class LocAppActivity extends FragmentActivity implements
 		LocationListener, OnClickListener {
 	
-	private static final String locationScriptUrl = "http://10.2.19.184/getLocation.php";
+	//private static final String locationScriptUrl = "http://10.2.19.184/getLocation.php";
+	private static final String locationScriptUrl = "http://igloo.dyndns-server.com/scripts/getLocation.php";
 	private Button refreshButton; 
 	private LocationManager locationManager;
 	private String provider;
@@ -50,6 +52,7 @@ public class LocAppActivity extends FragmentActivity implements
 	//private UpdateLocations locations;
 	private double longitude = 360;
 	private double latitude = 360;
+	boolean clearUserDb = false;
 
 
 	/** Called when the activity is first created. */
@@ -109,14 +112,14 @@ public class LocAppActivity extends FragmentActivity implements
 		//visibilityButton.setOnClickListener(this);
 		refreshButton = (Button) findViewById(R.id.refresh);
 		refreshButton.setOnClickListener(this);
-		spinner = (Spinner) findViewById(R.id.spinner1);
+		//spinner = (Spinner) findViewById(R.id.spinner1);
 		// Create an ArrayAdapter using the string array and a default spinner layout
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-		        R.array.array_radius_miles, android.R.layout.simple_spinner_item);
+		//ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		       // R.array.array_radius_miles, android.R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		//adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		// Apply the adapter to the spinner
-		spinner.setAdapter(adapter);
+		//spinner.setAdapter(adapter);
 		
 		Log.e(TAG,"Activity created");
 		
@@ -142,7 +145,7 @@ public class LocAppActivity extends FragmentActivity implements
 	    }
 	    
 	    //updateUIWithExistingLocation();
-		updateUIWithLastKnownLocation();
+		//updateUIWithLastKnownLocation();
 		locationManager.requestLocationUpdates(provider, TIME_BETWEEN_UPDATES, DISTANCE_BETWEEN_UPDATES, this);
 		uiHelper.onResume();
 	}
@@ -197,7 +200,7 @@ public class LocAppActivity extends FragmentActivity implements
 		UpdateLocations locations = new UpdateLocations(getBaseContext());
 		locations.execute(new String[] { locationScriptUrl,
 				Double.toString(longitude), Double.toString(latitude), accessToken });
-		updateSpinnerEntries(latitude, longitude, accessToken); // should be an async task.
+		updateUserLocationOnServer(latitude, longitude, accessToken);
 	}
 
 
@@ -242,14 +245,14 @@ public class LocAppActivity extends FragmentActivity implements
 		updateUIWithExistingLocation();
 	}
 	
-	private void updateVisibilityOnServer(String visibilityState){
+	/*private void updateVisibilityOnServer(String visibilityState){
 		UpdateVisibility visibility = new UpdateVisibility("hello");
 		visibility.execute(visibilityState);
-	}
+	}*/
 	
-	private void updateSpinnerEntries(double latitude, double longitude, String accessToken){
+	private void updateUserLocationOnServer(double latitude, double longitude, String accessToken){
 		Log.d(TAG,"in update spinner entries");
-		GeoFinder geoInfo = new GeoFinder(getBaseContext());
+		GeoFinder geoInfo = new GeoFinder(this);
 		geoInfo.execute(Double.toString(latitude), Double.toString(longitude), accessToken);	
 	}
 	
@@ -259,6 +262,11 @@ public class LocAppActivity extends FragmentActivity implements
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction transaction = fragmentManager.beginTransaction();
 		for(int i=0; i < fragments.length; i++ ) {
+			if (fragmentIndex == SPLASH) {
+				Log.e(TAG,"clearing DB");
+				int rowsDeleted =  getContentResolver().delete(LocationContentProvider.CONTENT_URI, null, null);
+				Log.e(TAG,"rows deleted: " + rowsDeleted);
+			}
 			if (i==fragmentIndex) {
 				transaction.show(fragments[i]);
 			}
@@ -267,6 +275,9 @@ public class LocAppActivity extends FragmentActivity implements
 		}
 		if (addToBackStack) 
 			transaction.addToBackStack(null);
+		
+		if (fragmentIndex == LIST)
+			updateUIWithLastKnownLocation();
 		
 		transaction.commit();
 	}
@@ -333,7 +344,7 @@ public class LocAppActivity extends FragmentActivity implements
 			if(session != null)
 				getData(latitude, longitude, session.getAccessToken());
 		} else {
-			Log.i(TAG,"last known location not available");
+			Log.e(TAG,"last known location not available");
 		}
 		
 		
@@ -352,13 +363,6 @@ public class LocAppActivity extends FragmentActivity implements
 	    	return session;
 	    else 
 	    	return null;
-	}
-	
-	
-	
-	
-	
-	
-	
+	}			
 	
 }

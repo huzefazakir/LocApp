@@ -28,7 +28,6 @@ public class LocationList extends ListFragment implements LoaderManager.LoaderCa
 	}
 	
 
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -51,7 +50,8 @@ public class LocationList extends ListFragment implements LoaderManager.LoaderCa
 	@Override
 	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
 		String[] projection = { LocationTable.COLUMN_ID, LocationTable.COLUMN_USER_ID, LocationTable.COLUMN_LOCATION, LocationTable.COLUMN_TIME };
-		CursorLoader cursorLoader = new CursorLoader(getActivity(), LocationContentProvider.CONTENT_URI, projection, null, null, null);
+		String sortOrder = LocationTable.COLUMN_TIME + " DESC";
+		CursorLoader cursorLoader = new CursorLoader(getActivity(), LocationContentProvider.CONTENT_URI, projection, null, null, sortOrder);
 		return cursorLoader;
 	}
 
